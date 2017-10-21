@@ -1,11 +1,14 @@
 #!/usr/bin/env python
+# PYTHON ARG_COMPLETE_OK
 """
 Download mp3/mp4 content from a youtube playlist
 """
 
 from __future__ import print_function
 import os
-
+import sys
+import argparse
+import argcomplete
 from get_port import find_free_port
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -72,6 +75,19 @@ def main():
     """
 
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+
+    parser = argparse.ArgumentParser('Youtube Ripper')
+    parser.add_argument('-c', '--codec', required=True,
+                        action='store', help='mp3 or mp4')
+    parser.add_argument('-o', '--output_dir', required=True,
+                        action='store', help='output_dir')
+    argcomplete.autocomplete(parser)
+    args = parser.parse_args()
+    if args.codec not in ('mp3', 'mp4'):
+        parser.print_help()
+        sys.exit(1)
+
     service = get_authenticated_service()
 
     playlists = playlists_list_mine(service, part='snippet,contentDetails',
@@ -84,23 +100,23 @@ def main():
         videos = get_playlist_items(service, part='snippet,contentDetails',
                                     maxResults=25,
                                     playlistId=playlist[0])
+        save_dir = args.output_dir + '/' + playlist[1]
         try:
-            os.mkdir(playlist[1])
+            os.mkdir(save_dir)
         except OSError:
             pass
         urls = ['https://youtu.be/{0}'.format(item[0]) for item in videos]
-        codec = 'mp3'
 
-        if 'mp3' in codec:
-            ydl_opts = {'outtmpl': '{0}/%(title)s.%(ext)s'.format(playlist[1]),
+        if 'mp3' in args.codec:
+            ydl_opts = {'outtmpl': '{0}/%(title)s.%(ext)s'.format(save_dir),
                         'format': 'bestaudio/best',
                         'postprocessors': [{
                             'key': 'FFmpegExtractAudio',
-                            'preferredcodec': codec,
+                            'preferredcodec': args.codec,
                             'preferredquality': '192'}],
                        }
         else:
-            ydl_opts = {'outtmpl': '{0}/%(title)s.%(ext)s'.format(playlist[1])}
+            ydl_opts = {'outtmpl': '{0}/%(title)s.%(ext)s'.format(save_dir)}
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download(urls)
