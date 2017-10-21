@@ -6,6 +6,7 @@ Download mp3/mp4 content from a youtube playlist
 
 from __future__ import print_function
 import os
+import pickle
 import sys
 import argparse
 import argcomplete
@@ -19,6 +20,7 @@ import youtube_dl
 # client_secret.
 HOME = os.getenv("HOME")
 CLIENT_SECRETS_FILE = HOME + "/.youtubecreds"
+STORAGE = HOME + "/.youtubesaved"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
@@ -64,7 +66,13 @@ def get_authenticated_service():
     """
 
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
-    credentials = flow.run_local_server(port=find_free_port())
+    try:
+        credentials = pickle.load(open(STORAGE, "rb"))
+    except (EOFError, IOError):
+        credentials = None
+    if credentials is None:
+        credentials = flow.run_local_server(port=find_free_port())
+        pickle.dump(credentials, open(STORAGE, "wb"))
     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 def main():
