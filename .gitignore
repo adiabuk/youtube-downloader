@@ -1,3 +1,13 @@
+# OS and editor tmp files
+*.bak
+*.pyc
+*.swn
+*.swo
+*.swp
+*.log
+*.~lock*
+*.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
