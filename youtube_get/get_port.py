@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import socket
 from contextlib import closing
 
@@ -6,4 +8,4 @@ def find_free_port():
         s.bind(('', 0))
         return s.getsockname()[1]
 
-print find_free_port()
+print(find_free_port())

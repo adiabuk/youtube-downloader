@@ -11,8 +11,8 @@ with open('requirements.txt', 'r') as reqs_file:
 VER = '0.1'
 
 setup(
-    name='youtube-get',
-    packages=['youtube-get'],
+    name='youtube_get',
+    packages=['youtube_get'],
     version=VER,
     description='an mp3/mp4 youtube downloader',
     author='Amro Diab',
