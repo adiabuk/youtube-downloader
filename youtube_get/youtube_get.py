@@ -64,8 +64,10 @@ def get_authenticated_service():
     """
     Authenticate with  Youtube API using OAUTH
     """
-
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    try:
+        flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    except FileNotFoundError:
+        sys.exit("Unable to find credentials file {0}".format(CLIENT_SECRETS_FILE))
     try:
         credentials = pickle.load(open(STORAGE, "rb"))
     except (EOFError, IOError):
