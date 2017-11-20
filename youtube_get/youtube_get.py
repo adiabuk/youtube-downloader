@@ -5,12 +5,14 @@ Download mp3/mp4 content from a youtube playlist
 """
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import os
 import pickle
 import sys
 import argparse
 import argcomplete
-from youtube_get.get_port import find_free_port
+from .get_port import find_free_port
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 import youtube_dl

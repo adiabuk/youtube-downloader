@@ -3,4 +3,9 @@ setuptools==36.6.0
 youtube_dl==2017.10.20
 google_auth_oauthlib==0.1.1
 google_api_python_client==1.6.4
-google-auth-httplib2==0.0.2
+google-auth-httplib2
+google-auth
+uritemplate
+oauth2client
+requests-oauthlib
+argcomplete
