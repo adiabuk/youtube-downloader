@@ -12,10 +12,11 @@ import pickle
 import sys
 import argparse
 import argcomplete
-from .get_port import find_free_port
+import youtube_dl
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
-import youtube_dl
+from .get_port import find_free_port
 
 # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
 # the OAuth 2.0 information for this application, including its client_id and
@@ -79,6 +80,12 @@ def get_authenticated_service():
         pickle.dump(credentials, open(STORAGE, "wb"))
     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
+def remove_non_ascii(text):
+    """Remove characters that are not fat-32 friendly for filename """
+
+    return ''.join(i for i in text if (i == ' ') or (ord(i) < 123 and ord(i) > 64) \
+            or (ord(i) > 45 and ord(i) < 57)).strip()
+
 def main():
     """
     Main module
@@ -118,20 +125,28 @@ def main():
         except OSError:
             pass
         urls = ['https://youtu.be/{0}'.format(item[0]) for item in videos]
+        for video in urls:
+            try:
+                with youtube_dl.YoutubeDL() as ydl:
+                    info_dict = ydl.extract_info(video, download=False)
+                    title = remove_non_ascii(info_dict.get('title', None))
+                if 'mp3' in args.codec:
+                    ydl_opts = {'outtmpl': '{0}/{1}.%(ext)s'.format(save_dir, title),
+                                'format': 'bestaudio/best',
+                                'postprocessors': [{
+                                    'key': 'FFmpegExtractAudio',
+                                    'preferredcodec': args.codec,
+                                    'preferredquality': '192'}],
+                               }
+                else:
+                    ydl_opts = {'outtmpl': '{0}/{1}.%(ext)s'.format(save_dir, title)}
+                print(ydl_opts)
+                print(urls)
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([video])
+            except youtube_dl.utils.DownloadError:
+                print("Skipping video...")
 
-        if 'mp3' in args.codec:
-            ydl_opts = {'outtmpl': '{0}/%(title)s.%(ext)s'.format(save_dir),
-                        'format': 'bestaudio/best',
-                        'postprocessors': [{
-                            'key': 'FFmpegExtractAudio',
-                            'preferredcodec': args.codec,
-                            'preferredquality': '192'}],
-                       }
-        else:
-            ydl_opts = {'outtmpl': '{0}/%(title)s.%(ext)s'.format(save_dir)}
-
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download(urls)
 
 if __name__ == '__main__':
     main()
