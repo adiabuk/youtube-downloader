@@ -97,15 +97,10 @@ def main():
 
 
     parser = argparse.ArgumentParser('Youtube Ripper')
-    parser.add_argument('-c', '--codec', required=True,
-                        action='store', help='mp3 or mp4')
     parser.add_argument('-o', '--output_dir', required=True,
                         action='store', help='output_dir')
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
-    if args.codec not in ('mp3', 'mp4'):
-        parser.print_help()
-        sys.exit(1)
 
     service = get_authenticated_service()
 
@@ -130,7 +125,7 @@ def main():
                 with youtube_dl.YoutubeDL() as ydl:
                     info_dict = ydl.extract_info(video, download=False)
                     title = remove_non_ascii(info_dict.get('title', None))
-                if 'mp3' in args.codec:
+                if 'music' in playlist[1]:
                     ydl_opts = {'outtmpl': '{0}/{1}.%(ext)s'.format(save_dir, title),
                                 'format': 'bestaudio/best',
                                 'postprocessors': [{
