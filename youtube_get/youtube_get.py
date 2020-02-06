@@ -130,7 +130,7 @@ def main():
                                 'format': 'bestaudio/best',
                                 'postprocessors': [{
                                     'key': 'FFmpegExtractAudio',
-                                    'preferredcodec': args.codec,
+                                    'preferredcodec': 'mp3',
                                     'preferredquality': '192'}],
                                }
                 else:
